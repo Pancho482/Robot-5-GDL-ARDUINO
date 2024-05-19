@@ -1,0 +1,498 @@
+// Francisco Trujillo Flores
+
+#include <Keypad.h> // Librería para teclado matricial
+#include <LiquidCrystal_I2C.h> // Librería para la pantalla 16x2 con I2C
+#include <Servo.h> // Librería para usar los servomotores
+#include <math.h> // Librería para funciones matemáticas
+
+// Se declaran nuestras variables a usar
+float t1, t2, t3, t4, t5, t6;
+float r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12;
+double theta1, theta2, theta3, theta4, theta11, theta1a, theta2a;
+
+// Se crean los objetos para controlar los servomotores
+servo1, servo2, servo3, servo4, servo5, servo6;
+
+// Se declara una variable key de tipo char que se usará para almacenar el valor de la tecla
+char key;
+
+// Se indica que el teclado tiene 4 filas y 4 columnas.
+const byte FILAS = 4;
+const byte COLUMNAS = 4;
+
+// Aquí se declara una matriz de teclas de 4x4 que almacena los caracteres correspondientes a cada tecla del teclado. 
+char teclas[FILAS][COLUMNAS] = {
+  {'1','2','3','A'},
+  {'4','5','6','B'},
+  {'7','8','9','C'},
+  {'*','0','#','D'}
+};
+
+// Se definen los pines a los cuales se conectaran
+byte pinesFilas[FILAS] = {9, 8, 7, 6};
+byte pinesColumnas[COLUMNAS] = {5, 4, 3, 2};
+
+// Crea un objeto teclado de la clase Keypad
+Keypad teclado = Keypad(makeKeymap(teclas), pinesFilas, pinesColumnas, FILAS, COLUMNAS);
+
+// Se escribe la dirección I2C del dispositivo (0x27 en este caso) y las dimensiones de la pantalla (20 columnas por 4 filas).
+LiquidCrystal_I2C lcd(0x27, 20, 4); 
+
+void setup() {
+  
+  // Se asignan los pines específicos del Arduino para cada servo
+  servo1.attach(10);
+  servo2.attach(11);
+  servo3.attach(12);
+  servo4.attach(13);
+  servo5.attach(A0);
+  servo6.attach(A1);
+
+  // Se asigna la posición inicial de los servos
+  servo1.write(0);
+  servo2.write(0);
+  servo3.write(0);
+  servo4.write(0);
+  servo5.write(18);
+  servo6.write(0);
+
+  pinMode(A3, OUTPUT);             // Se configura la salida del indicador LED azul 
+  digitalWrite(A3, HIGH);          // Se pone en estado de alto
+  lcd.init();                      // Inicializar la pantalla LCD
+  lcd.backlight();                 // Encender la retroiluminación
+
+  // Se escribe el mensaje inicial
+  lcd.setCursor(1, 1);
+  lcd.print("Cinematica directa");
+  lcd.setCursor(5, 2);
+  lcd.print("e inversa");
+  delay(3000);
+  mostrarMensajeInicial(); // Se manda a la subrutina mostrar mensaje inicial
+}
+
+void loop() {
+
+  
+  char key = teclado.getKey(); // Esta función pertenece a la biblioteca Keypad y se utiliza para leer la tecla actualmente presionada en el teclado matricial
+   if (key != NO_KEY) {        // Se verifica si se presiono una tecla, NO_KEY es una constante de la biblioteca Keypad que indica que no se ha presionado ninguna tecla, el código dentro del if no se ejecutará.
+    switch (key) {             // Se utiliza una función Switch
+      case '1':
+        ejecutarCodigo1();     // Si la tecla que se presiono es 1, se ira a la subrutina ejecutarCodigo1 
+        break;
+
+      case '2':
+        ejecutarCodigo2();     // Si la tecla que se presiono es 2, se ira a la subrutina ejecutarCodigo2
+        break;
+
+      case '3':
+        rutinaServomotores();  // Si la tecla que se presiono es 3, se ira a la subrutina rutinaServomotores
+        break;
+
+      default:                 // Si la tecla que se presiono es otra, saldrá la leyenda tecla no valida
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Tecla no valida");
+        delay(1000);
+        mostrarMensajeInicial();
+        break;
+    }
+  } 
+  
+}
+
+void mostrarMensajeInicial() {         // Subrutina mostrarMensajeInicial
+
+  // Se muestra el mensaje del menú principal y se apaga la luz LED azul
+  lcd.clear();
+  digitalWrite(A3, HIGH); 
+  lcd.setCursor(0, 0);
+  lcd.print("Presiona:");
+  lcd.setCursor(0, 1);
+  lcd.print("1:Cinematica directa");
+  lcd.setCursor(0, 2);
+  lcd.print("2:Cinematica inversa");
+  lcd.setCursor(0, 3);
+  lcd.print("3:Ejecutar rutina");
+}
+
+void parpadeoled() {      //subrutina parpadeoled
+
+ digitalWrite(A3, LOW); 
+ delay(500);
+ digitalWrite(A3, HIGH); 
+ delay(500); 
+  
+}
+void rutinaServomotores() {    // Subrutina de servomotores
+
+  lcd.clear();
+  lcd.setCursor(5, 1);
+  lcd.print("Ejecutando");
+  lcd.setCursor(7, 2);
+  lcd.print("rutina");
+   
+  parpadeoled(); 
+  parpadeoled();
+
+  servo1.write(180); 
+  parpadeoled();
+
+  servo4.write(30);  
+  parpadeoled();
+
+  servo3.write(70);  
+  parpadeoled();
+  parpadeoled();
+
+  servo3.write(100);
+  parpadeoled(); 
+  parpadeoled();
+
+  servo3.write(135);  
+  parpadeoled(); 
+  parpadeoled();
+ 
+  servo2.write(35); 
+  parpadeoled();
+
+  servo6.write(40);  
+  parpadeoled();
+
+  servo4.write(0); 
+  parpadeoled();
+
+  servo3.write(70);  
+  parpadeoled();  
+
+  servo1.write(120);
+  parpadeoled();
+
+  servo3.write(100); 
+  parpadeoled(); 
+  parpadeoled();
+
+  servo3.write(135);  
+  parpadeoled();
+  parpadeoled();
+
+  servo4.write(30);  
+  parpadeoled();
+  parpadeoled();
+
+  servo6.write(0);
+  parpadeoled();
+
+  servo3.write(70);
+  parpadeoled();
+
+  
+  lcd.clear();
+  mostrarMensajeInicial();
+}
+
+void ejecutarCodigo1() {              // subrutina ejecutarCodigo1
+ 
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Cinematica directa");
+  lcd.setCursor(5, 2);
+  lcd.print("Presiona A");
+  lcd.setCursor(3, 3);
+  lcd.print("para continuar");
+  
+  // Se define un arreglo de Strings para almacenar los números
+  String numeros[6];
+  
+  // Se define un bucle para ingresar los seis números
+  for (int i = 0; i < 6; i++) {
+    // Se muestra el mensaje correspondiente para el número actual
+    lcd.setCursor(0, 1);
+    lcd.print("Angulo " + String(i + 1) + ":");
+    lcd.setCursor(9, 1);
+    lcd.print("      ");
+    lcd.setCursor(10, 1);
+
+    
+    // Bucle para ingresar el número actual
+    while (true) {
+      key = teclado.getKey();
+      if (key != NO_KEY) {
+        if (key == 'A') {
+          if (numeros[i].length() > 0) {
+            // Se muestra el número ingresado
+            
+            lcd.setCursor(0, 2);
+            lcd.print("Angulo " + String(i + 1) + ":          ");
+            lcd.setCursor(10, 2);
+            lcd.print(numeros[i]);
+            lcd.setCursor(0, 3);
+            lcd.print("     Presiona A  ");
+            break;
+          }
+
+          // Se verifica que sea un numero lo que se ingresa y se imprime en la lcd
+        } else if (key >= '0' && key <= '9') {
+          numeros[i] += key;
+          lcd.print(key);
+        }
+      }
+    }
+  }
+
+  // Con los números ingresados se hacen los calculos de cinemática directa
+  // Ya que el IDE de Arduino se maneja en radianes hacemos la conversión de grados a radianes
+
+  t1 = numeros[0].toInt() * 0.01745;
+  t2 = numeros[1].toInt() * 0.01745;
+  t3 = numeros[2].toInt() * 0.01745;
+  t4 = numeros[3].toInt() * 0.01745;
+  t5 = numeros[4].toInt() * 0.01745;
+  t6 = numeros[5].toInt() * 0.01745;
+  
+  r1 = 7.25 * cos(t1 + t2 + t3) - 3.5 * sin(t1 + t2 + t3 + t4 - 1.571) + 5.25 * cos(t1 - 1.0 * t2) - 3.5 * sin(t2 - 1.0 * t1 + t3 + t4 - 1.571) + 5.25 * cos(t1 + t2) + 7.25 * cos(t2 - 1.0 * t1 + t3);
+  r2 = 7.25 * sin(t1 + t2 + t3) + 5.25 * sin(t1 - 1.0 * t2) - 3.5 * cos(t2 - 1.0 * t1 + t3 + t4 - 1.571) + 5.25 * sin(t1 + t2) - 7.25 * sin(t2 - 1.0 * t1 + t3) + 3.5 * cos(t1 + t2 + t3 + t4 - 1.571);
+  r3 = 7.0 * cos(t2 + t3 + t4 - 1.571) + 14.5*sin(t2 + t3) + 10.5*sin(t2) + 2.0 ;
+  r4 = 0.25 * cos(t1 + t2 + t3 + t4 - 1.0 * t5 - 1.571) + 0.25 * cos(t2 - 1.0 * t1 + t3 + t4 + t5 - 1.571) - 0.5*cos(t1 - 1.0 * t5) + 0.25 * cos(t1 - 1.0 * t2 - 1.0 * t3 - 1.0 * t4 + t5 + 1.571) + 0.25 * cos(t1 + t2 + t3 + t4 + t5 - 1.571) + 0.5 * cos(t1 + t5);
+  r5 = 0.25 * sin(t1 + t2 + t3 + t4 - 1.0 * t5 - 1.571) - 0.25 * sin(t2 - 1.0 * t1 + t3 + t4 + t5 - 1.571) - 0.5*sin(t1 - 1.0 * t5) + 0.25 * sin(t1 - 1.0 * t2 - 1.0 * t3 - 1.0 * t4 + t5 + 1.571) + 0.25 * sin(t1 + t2 + t3 + t4 + t5 - 1.571) + 0.5 * sin(t1 + t5);
+  r6 = 1.0 * sin(t2 + t3 + t4 - 1.571) * cos(t5);
+  r7 = 0.25 * sin(t1 + t2 + t3 + t4 - 1.0 * t5 - 1.571) - 0.25 * sin(t2 - 1.0*t1 + t3 + t4 + t5 - 1.571) - 0.5 * sin(t1 - 1.0*t5) - 0.25*sin(t1 - 1.0 * t2 - 1.0 * t3 - 1.0 * t4 + t5 + 1.571) - 0.25 * sin(t1 + t2 + t3 + t4 + t5 - 1.571) - 0.5 * sin(t1 + t5);
+  r8 = 0.5 * cos(t1 - 1.0 * t5) - 0.25 * cos(t2 - 1.0 * t1 + t3 + t4 + t5 - 1.571) - 0.25 * cos(t1 + t2 + t3 + t4 - 1.0 * t5 - 1.571) + 0.25 * cos(t1 - 1.0 * t2 - 1.0 * t3 - 1.0 * t4 + t5 + 1.571) + 0.25 * cos(t1 + t2 + t3 + t4 + t5 - 1.571) + 0.5 * cos(t1 + t5);
+  r9 = - 1.0 * sin(t2 + t3 + t4 - 1.571) * sin(t5);
+  r10 =  - 0.5 * sin(t2 - 1.0 * t1 + t3 + t4 - 1.571) - 0.5 * sin(t1 + t2 + t3 + t4 - 1.571);
+  r11 = 0.5 * cos(t1 + t2 + t3 + t4 - 1.571) - 0.5 * cos(t2 - 1.0 * t1 + t3 + t4 - 1.571);
+  r12 = cos(t2 + t3 + t4 - 1.571);
+
+  // Ponemos como condicionales para que el robot no pase de 180 grados, ya que los servos son de 180 grados
+  if(r3<-3 || numeros[0].toInt() > 180 || numeros[1].toInt() > 180 || numeros[2].toInt() > 180 || numeros[3].toInt() > 180 || numeros[4].toInt() > 180 || numeros[5].toInt() > 180 ){
+  lcd.clear();
+  lcd.setCursor(6, 1);
+  lcd.print("Valor no");
+  lcd.setCursor(7, 2);
+  lcd.print("Valido");
+  delay(2000);
+  mostrarMensajeInicial();
+  }
+
+  // Se imprimen los valores de nuestra cinemática directa
+  else{
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Posi:");
+  lcd.setCursor(5, 0);
+  lcd.print("(");
+  lcd.print(r1, 1);
+  lcd.print(",");
+  lcd.print(r2, 1);
+  lcd.print(",");
+  lcd.print(r3, 1);
+  lcd.print(")");
+  lcd.setCursor(0, 1);
+  lcd.print("VecX:");
+  lcd.setCursor(5, 1);
+  lcd.print("(");
+  lcd.print(r4, 1);
+  lcd.print(",");
+  lcd.print(r5, 1);
+  lcd.print(",");
+  lcd.print(r6, 1);
+  lcd.print(")");
+  lcd.setCursor(0, 2);
+  lcd.print("VecY:");
+  lcd.setCursor(5, 2);
+  lcd.print("(");
+  lcd.print(r7, 1);
+  lcd.print(",");
+  lcd.print(r8, 1);
+  lcd.print(",");
+  lcd.print(r9, 1);
+  lcd.print(")");
+  lcd.setCursor(0, 3);
+  lcd.print("VecZ:");
+  lcd.setCursor(5, 3);
+  lcd.print("(");
+  lcd.print(r10, 1);
+  lcd.print(",");
+  lcd.print(r11, 1);
+  lcd.print(",");
+  lcd.print(r12, 1);
+  lcd.print(")");
+
+  parpadeoled();  
+  parpadeoled(); 
+  servo1.write(numeros[0].toInt());
+  parpadeoled();
+  servo3.write(numeros[2].toInt());
+  parpadeoled();
+  servo4.write(numeros[3].toInt());
+  parpadeoled();
+  servo2.write(numeros[1].toInt());
+  parpadeoled();
+  servo5.write(18 + numeros[4].toInt());
+  parpadeoled();
+  servo6.write(numeros[5].toInt());
+  parpadeoled();
+  
+  
+  }
+  // Esperar hasta que se presione 'A' nuevamente para continuar
+  while (teclado.getKey() != 'A') {
+    
+    delay(10);
+  }
+  
+  lcd.clear();
+  mostrarMensajeInicial();
+}
+
+void ejecutarCodigo2() {
+  // Código del segundo programa
+  lcd.clear();
+  lcd.setCursor(1, 0);
+  lcd.print("Cinematica inversa");
+  lcd.setCursor(5,2);
+  lcd.print("Presiona A");
+  lcd.setCursor(3, 3);
+  lcd.print("para continuar");
+  
+  // Se definen variables para almacenar las coordenadas
+  int Px, Py, Pz;
+
+  // Se solicita la coordenada X
+  lcd.setCursor(0, 1);
+  lcd.print("Coordenada X:");
+  lcd.setCursor(13, 1);
+  lcd.print("     ");
+  lcd.setCursor(13, 1);
+  Px = leerCoordenada(); // Se va a subrutina leerCoordenada
+
+  lcd.setCursor(0,3);
+  lcd.print("     Presiona A     ");
+  // Se solicita la coordenada Y
+  lcd.setCursor(0, 2);
+  lcd.print("Coordenada Y:");
+  lcd.setCursor(13, 2);
+  lcd.print("     ");
+  lcd.setCursor(13, 2);
+  Py = leerCoordenada(); // Se va a subrutina leerCoordenada
+
+  // Se solicita la coordenada Z
+  lcd.setCursor(0, 3);
+  lcd.print("Coordenada Z:");
+  lcd.setCursor(13, 3);
+  lcd.print("     ");
+  lcd.setCursor(13, 3);
+  Pz = leerCoordenada(); // Se va a subrutina leerCoordenada
+
+  // Se realizan los calculos necesarios para la cinematica inversa
+  // Cálculo de theta1
+  theta1 = atan2(Py, Px);
+  // Cálculo de términos individuales
+  float term1 = 29 * sin(theta3);
+  float term2_part1 = 1218 * cos(theta3);
+  float term2_part2 = 841 * pow(cos(theta3), 2) - 4 * pow(Px, 2) * pow(cos(theta1), 2) + 841 * pow(sin(theta3), 2) - 4 * pow(Py, 2) * pow(sin(theta1), 2);
+  float term2_part3 = - 588 * cos(1571 / 1000.0) * cos(theta3) * sin(theta4) - 588 * cos(1571 / 1000.0) * cos(theta4) * sin(theta3) + 588 * sin(1571 / 1000.0) * cos(theta3) * cos(theta4);
+  float term2_part4 = + 196 * pow(cos(1571 / 1000.0), 2) * pow(cos(theta3), 2) * pow(cos(theta4), 2) + 196 * pow(cos(1571 / 1000.0), 2) * pow(cos(theta3), 2) * pow(sin(theta4), 2) + 196 * pow(cos(1571 / 1000.0), 2) * pow(cos(theta4), 2) * pow(sin(theta3), 2);
+  float term2_part5 = + 196 * pow(sin(1571 / 1000.0), 2) * pow(cos(theta3), 2) * pow(cos(theta4), 2) - 588 * sin(1571 / 1000.0) * sin(theta3) * sin(theta4) + 196 * pow(cos(1571 / 1000.0), 2) * pow(sin(theta3), 2) * pow(sin(theta4), 2) + 196 * pow(sin(1571 / 1000.0), 2) * pow(cos(theta3), 2) * pow(sin(theta4), 2) + 196 * pow(sin(1571 / 1000.0), 2) * pow(cos(theta4), 2) * pow(sin(theta3), 2) + 196 * pow(sin(1571 / 1000.0), 2) * pow(sin(theta3), 2) * pow(sin(theta4), 2);
+  float term2_part6 = - 812 * cos(1571 / 1000.0) * pow(cos(theta3), 2) * sin(theta4) + 812 * sin(1571 / 1000.0) * pow(cos(theta3), 2) * cos(theta4) - 812 * cos(1571 / 1000.0) * pow(sin(theta3), 2) * sin(theta4) + 812 * sin(1571 / 1000.0) * cos(theta4) * pow(sin(theta3), 2) - 8 * Px * Py * cos(theta1) * sin(theta1) + 441;
+
+  float term2 = term2_part1 + term2_part2 + term2_part3 + term2_part4 + term2_part5 + term2_part6;
+
+  float term3 = sqrt(term2);
+  float term4 = 14 * cos(1571 / 1000.0) * cos(theta3) * cos(theta4) - 14 * cos(1571 / 1000.0) * sin(theta3) * sin(theta4) + 14 * sin(1571 / 1000.0) * cos(theta3) * sin(theta4) + 14 * sin(1571 / 1000.0) * cos(theta4) * sin(theta3);
+  float term5 = 29 * cos(theta3) + 2 * Px * cos(theta1) + 2 * Py * sin(theta1) - 14 * cos(1571 / 1000.0) * cos(theta3) * sin(theta4) - 14 * cos(1571 / 1000.0) * cos(theta4) * sin(theta3) + 14 * sin(1571 / 1000.0) * cos(theta3) * cos(theta4) - 14 * sin(1571 / 1000.0) * sin(theta3) * sin(theta4) + 21;
+
+  // Cálculo de theta2
+  float theta2 = -2 * atan((term1 - term3 + term4) / term5);
+  theta3 = 0;
+  theta4 = 0;
+
+  if (theta1 >= 0) {
+    theta1a = theta1 * (180 / PI);
+    theta2a = theta2 * (180 / PI);
+  }
+
+  if (theta1 < 0) {
+    theta11 = theta1 + PI;
+    theta1a = theta11 * (180 / PI);
+    theta2a = abs((theta2 - PI) * (180 / PI));
+  }
+
+  lcd.clear();
+  lcd.setCursor(1, 0);
+  lcd.print("Cinematica inversa");
+  lcd.setCursor(0, 1);
+  lcd.print("Theta1:");
+  lcd.print(int(theta1a)); // Convertir a entero antes de imprimir
+  lcd.setCursor(0, 2);
+  lcd.print("Theta2:");
+  lcd.print(int(theta2a)); // Convertir a entero antes de imprimir
+  lcd.setCursor(10, 1);
+  lcd.print("Theta3:");
+  lcd.print(int(theta3)); // Convertir a entero antes de imprimir
+  lcd.setCursor(10, 2);
+  lcd.print("Theta4:");
+  lcd.print(int(theta4)); // Convertir a entero antes de imprimir
+  lcd.setCursor(2, 3);
+  lcd.print("A para continuar");
+
+  parpadeoled();  
+  parpadeoled(); 
+
+  servo1.write(theta1a);
+  parpadeoled();
+
+  servo2.write(theta2a);
+  digitalWrite(A3, LOW); 
+  parpadeoled();
+
+  servo3.write(0);
+  parpadeoled();
+
+  servo4.write(0);
+  parpadeoled();
+  
+  servo5.write(18);
+  parpadeoled();
+
+  servo6.write(0);
+  parpadeoled();
+
+
+
+  // Espera hasta que se presione 'A' nuevamente para continuar
+  while (teclado.getKey() != 'A') {
+    delay(10);
+  }
+  lcd.clear();
+  mostrarMensajeInicial();
+}
+
+int leerCoordenada() {
+  String valorTemporal = "";
+  bool puntoDecimal = false; // Bandera para controlar si ya se ingresó un punto decimal
+  bool negativo = false; // Bandera para controlar si ya se ingresó un signo negativo
+  while (true) {
+    char tecla = teclado.getKey();
+    if (tecla) {
+      if (tecla == 'A') { // Si se presiona 'A', se confirma la entrada
+        return valorTemporal.toInt();
+      } else if (tecla == '*') { // Si se presiona '*', se agrega un signo negativo
+        if (!negativo) {
+          valorTemporal = "-" + valorTemporal;
+          negativo = true;
+          lcd.print("-");
+        }
+      } else if (tecla == '#') { // Si se presiona '#', se agrega un punto decimal
+        if (!puntoDecimal) {
+          valorTemporal += ".";
+          puntoDecimal = true;
+          lcd.print(".");
+        }
+      } else if (tecla >= '0' && tecla <= '9') { // Se concatena el dígito presionado
+        valorTemporal += tecla;
+        lcd.print(tecla);
+      }
+    }
+    delay(50); // Pequeño retraso para evitar la lectura rápida de teclas
+  }
+}
